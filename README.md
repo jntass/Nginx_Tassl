@@ -2,7 +2,7 @@
  通过tassl支持国密协议的nginx
  ## 如何使nginx调用tassl实现国密ssl协议？
 具体方法如下：
-1.	下载Tassl-1.1.1b_R_0.8.tgz版本进行编译。
+1.	下载Tassl-1.1.1b_R_0.8.tgz版本进行编译，并安装到/root/lib_r/tassl中，如是其他目录需要在第二步的configure时，替换--with-openssl的目录。
 2.	下载江南天安修改的nginx-1.16.0_tassl.tgz支持国密的nginx进行编译。
 
       ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --with-openssl=/root/lib_r/tassl --prefix=/root/nginx
