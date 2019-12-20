@@ -43,5 +43,5 @@
       经过多次测试，目前可以添加根证书生效的版本360_mini_installer_sm_7.exe，已经附件到另一个仓库中https://github.com/jntass/GM_BROWERS
       而且我们的测试环境是Windows 7系统。
 
-      更多信息参考：https://bbs.360.cn/forum.php?mod=viewthread&tid=15660975。
+      更多信息参考：https://bbs.360.cn/forum.php?mod=viewthread&tid=15660975
 
