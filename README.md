@@ -38,9 +38,9 @@
 
       360国密浏览器版本目前较多。而且和新版本的Windows 10系统，会偶发性的导致系统重启。
       而且360要求自己添加根证书，如果没有添加会导致SSL握手完成后显示证书不正确。
-      添加跟证书方法：将根证书放在ctl.dat中，然后放在%appdata%/360se6\Application\User Data\Default\ctl目录中，
+      添加跟证书方法：将根证书放在ctl.dat文件中，然后把此文件放在%appdata%/360se6\Application\User Data\Default\ctl目录中，
       注意：上面从"User Data\Default\ctl"的目录并不存在，需要手工创建。
-      经过多次测试，目前可以添加根证书生效的版本360_mini_installer_sm_7.exe，已经附件到另一个仓库中https://github.com/jntass/GM_BROWERS。
+      经过多次测试，目前可以添加根证书生效的版本360_mini_installer_sm_7.exe，已经附件到另一个仓库中https://github.com/jntass/GM_BROWERS。而且我们的测试环境是Windows 7系统。
 
       更多信息参考：https://bbs.360.cn/forum.php?mod=viewthread&tid=15660975。
 
