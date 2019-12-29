@@ -15,13 +15,13 @@
 
      配置nginx.conf证书部分：
 
-     ssl_certificate      /root/lib_r/tassl/tassl_demo/cert/certs/SS.crt;/*签名证书*/
+     ssl_certificate      /root/lib_r/tassl/tassl_demo/cert/certs/SS.crt;    #/*签名证书*/
 
-     ssl_certificate_key  /root/lib_r/tassl/tassl_demo/cert/certs/SS.key; /*签名私钥*/
+     ssl_certificate_key  /root/lib_r/tassl/tassl_demo/cert/certs/SS.key;     #/*签名私钥*/
 
-     ssl_enc_certificate      /root/lib_r/tassl/tassl_demo/cert/certs/SE.crt; /*加密证书*/
+     ssl_enc_certificate      /root/lib_r/tassl/tassl_demo/cert/certs/SE.crt;     #/*加密证书*/
 
-     ssl_enc_certificate_key  /root/lib_r/tassl/tassl_demo/cert/certs/SE.key; /*加密私钥*/
+     ssl_enc_certificate_key  /root/lib_r/tassl/tassl_demo/cert/certs/SE.key;     #/*加密私钥*/
 
       注意：签名证书的证书用途需有数据签名功能，加密证书的证书用途需有数据加密功能。如果功能不正确，会导致握手失败。调用tassl_demo/cert/中的脚本生成的证书已经具备相应功能,可以用来测试。
 4.	下载密信浏览器或者360浏览器进行测试国密网站。
