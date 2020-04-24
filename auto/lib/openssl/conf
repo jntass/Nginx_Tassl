@@ -38,8 +38,8 @@ if [ $OPENSSL != NONE ]; then
 
             CORE_INCS="$CORE_INCS $OPENSSL/include"
             CORE_DEPS="$CORE_DEPS $OPENSSL/include/openssl/ssl.h"
-            CORE_LIBS="$CORE_LIBS $OPENSSL/lib/libssl.a"
-            CORE_LIBS="$CORE_LIBS $OPENSSL/lib/libcrypto.a"
+            CORE_LIBS="$CORE_LIBS $OPENSSL/lib/libssl.so"
+            CORE_LIBS="$CORE_LIBS $OPENSSL/lib/libcrypto.so"
             CORE_LIBS="$CORE_LIBS $NGX_LIBDL"
             CORE_LIBS="$CORE_LIBS $NGX_LIBPTHREAD"
 
