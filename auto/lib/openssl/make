@@ -54,7 +54,9 @@ $OPENSSL/.openssl/include/openssl/ssl.h:	$NGX_MAKEFILE
 	&& ./config --prefix=$ngx_prefix no-shared no-threads $OPENSSL_OPT \\
 	&& \$(MAKE) \\
 	&& \$(MAKE) install_sw LIBDIR=lib
-
+	
+tass_setting:
+	@echo 'export LD_LIBRARY_PATH=$OPENSSL/lib:\$LD_LIBRARY_PATH' >$NGX_PREFIX/sbin/setting
 END
 
     ;;
