@@ -535,8 +535,8 @@ ngx_ssl_certificate(ngx_conf_t *cf, ngx_ssl_t *ssl, ngx_str_t *cert,
 
 		 //load enc cert and key for GM by TASS gujq if enc_cert len > 0
     if(enc_cert->len > 0){
-    	if (SSL_CTX_use_certificate_file(ssl->ctx, (char *)enc_cert->data, SSL_FILETYPE_PEM) == 0) {
-    		ngx_ssl_error(NGX_LOG_EMERG, ssl->log, 0, "SSL_CTX_use_certificate_file load enc cert(\"%s\") failed", enc_cert->data);
+    	if (SSL_CTX_use_enc_certificate_file(ssl->ctx, (char *)enc_cert->data, SSL_FILETYPE_PEM) == 0) {
+    		ngx_ssl_error(NGX_LOG_EMERG, ssl->log, 0, "SSL_CTX_use_enc_certificate_file load enc cert(\"%s\") failed", enc_cert->data);
     		return NGX_ERROR;
     	}
     	
