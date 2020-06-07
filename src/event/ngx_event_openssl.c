@@ -253,7 +253,7 @@ ngx_int_t
 ngx_ssl_create(ngx_ssl_t *ssl, ngx_uint_t protocols, void *data)
 {
     if(data && *(ngx_uint_t *)data == 99){     //99 is just a lable, doesn't make sense
-        ssl->ctx = SSL_CTX_new(CNTLS_client_method());     //modify by TASS gujq for SM2 coroperated with ngx_http_proxy_set_ssl() in ngx_http_proxy_module.c
+        ssl->ctx = SSL_CTX_new(CNTLS_client_method());     //modify by TASS gujq for SM2 coroperated with ngx_http_proxy_set_ssl()|ngx_stream_proxy_set_ssl() in ngx_http_proxy_module.c
         data = NULL;
     }
     else{
@@ -535,8 +535,8 @@ ngx_ssl_certificate(ngx_conf_t *cf, ngx_ssl_t *ssl, ngx_str_t *cert,
 
 		 //load enc cert and key for GM by TASS gujq if enc_cert len > 0
     if(enc_cert->len > 0){
-    	if (SSL_CTX_use_certificate_file(ssl->ctx, (char *)enc_cert->data, SSL_FILETYPE_PEM) == 0) {
-    		ngx_ssl_error(NGX_LOG_EMERG, ssl->log, 0, "SSL_CTX_use_certificate_file load enc cert(\"%s\") failed", enc_cert->data);
+    	if (SSL_CTX_use_enc_certificate_file(ssl->ctx, (char *)enc_cert->data, SSL_FILETYPE_PEM) == 0) {
+    		ngx_ssl_error(NGX_LOG_EMERG, ssl->log, 0, "SSL_CTX_use_enc_certificate_file load enc cert(\"%s\") failed", enc_cert->data);
     		return NGX_ERROR;
     	}
     	
@@ -764,16 +764,16 @@ ngx_ssl_load_certificate_key(ngx_pool_t *pool, char **err,
 
 
 
-        if (ENGINE_init(engine)) {
-        	*last++ = ':';
-        	pkey = ENGINE_load_private_key(engine, 0, 0, (char *) last);
+        if (ENGINE_init(engine)) {        //add by TASS Gujq for tassl
+            *last++ = ':';
+            pkey = ENGINE_load_private_key(engine, (char *) last, 0, (char *) last);
 
-        	if (pkey == NULL) {
-        		*err = "ENGINE_load_private_key() failed";
-            ENGINE_free(engine);
-            return NULL;
-          }
-          ENGINE_finish(engine);
+            if (pkey == NULL) {
+                *err = "ENGINE_load_private_key() failed";
+                ENGINE_free(engine);
+                return NULL;
+            }
+            ENGINE_finish(engine);
         }
 
         ENGINE_free(engine);

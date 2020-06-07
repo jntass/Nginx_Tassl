@@ -99,10 +99,11 @@ typedef struct {
     ngx_str_t                      ssl_crl;
     ngx_str_t                      ssl_certificate;
     ngx_str_t                      ssl_certificate_key;
-    
+    ngx_flag_t                     ssl_tass_sm4;            //add by TASS gujq for use tass engine to do sm4
     ngx_flag_t                     ssl_gm;                  //add by TASS gujq for ssl_gm
-    ngx_str_t                      certificates_enc;        //add by TASS gujq for GM        
-    ngx_str_t                      certificate_enc_keys;    //add by TASS gujq for GM
+    ngx_str_t                      ssl_enc_certificate;        //add by TASS gujq for GM        
+    ngx_str_t                      ssl_enc_certificate_key;
+    
   
     ngx_array_t                   *ssl_passwords;
 #endif
@@ -684,13 +685,6 @@ static ngx_command_t  ngx_http_proxy_commands[] = {
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_proxy_loc_conf_t, upstream.ssl_verify),
       NULL },
-     
-     { ngx_string("proxy_ssl_gm"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_proxy_loc_conf_t, ssl_gm),
-      NULL },
 
     { ngx_string("proxy_ssl_verify_depth"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
@@ -725,6 +719,34 @@ static ngx_command_t  ngx_http_proxy_commands[] = {
       ngx_conf_set_str_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_proxy_loc_conf_t, ssl_certificate_key),
+      NULL },
+      
+      { ngx_string("proxy_ssl_tass_sm4"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
+      ngx_conf_set_flag_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_proxy_loc_conf_t, ssl_tass_sm4),
+      NULL },
+      
+      { ngx_string("proxy_ssl_gm"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
+      ngx_conf_set_flag_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_proxy_loc_conf_t, ssl_gm),
+      NULL },
+      
+     { ngx_string("proxy_ssl_enc_certificate"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_str_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_proxy_loc_conf_t, ssl_enc_certificate),
+      NULL },
+
+    { ngx_string("proxy_ssl_enc_certificate_key"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_str_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_proxy_loc_conf_t, ssl_enc_certificate_key),
       NULL },
 
     { ngx_string("proxy_ssl_password_file"),
@@ -2894,6 +2916,7 @@ ngx_http_proxy_create_loc_conf(ngx_conf_t *cf)
     conf->upstream.ssl_session_reuse = NGX_CONF_UNSET;
     conf->upstream.ssl_server_name = NGX_CONF_UNSET;
     conf->upstream.ssl_verify = NGX_CONF_UNSET;
+    conf->ssl_tass_sm4 = NGX_CONF_UNSET;           //add by TASS gujq for use tass engine to do sm4
     conf->ssl_gm = NGX_CONF_UNSET;                 //add by TASS gujq for ssl_gm
     conf->ssl_verify_depth = NGX_CONF_UNSET_UINT;
     conf->ssl_passwords = NGX_CONF_UNSET_PTR;
@@ -3239,6 +3262,12 @@ ngx_http_proxy_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
                               prev->ssl_certificate, "");
     ngx_conf_merge_str_value(conf->ssl_certificate_key,
                               prev->ssl_certificate_key, "");
+                              
+    ngx_conf_merge_str_value(conf->ssl_enc_certificate,
+                              prev->ssl_enc_certificate, "");
+    ngx_conf_merge_str_value(conf->ssl_enc_certificate_key,
+                              prev->ssl_enc_certificate_key, "");
+                              
     ngx_conf_merge_ptr_value(conf->ssl_passwords, prev->ssl_passwords, NULL);
 
     if (conf->ssl && ngx_http_proxy_set_ssl(cf, conf) != NGX_OK) {
@@ -4274,22 +4303,38 @@ ngx_http_proxy_set_ssl(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *plcf)
     }
 
     plcf->upstream.ssl->log = cf->log;
-		
-		if(plcf->ssl_gm == 1){ // add by TASS gujq for http proxy gm client ssl init
-			ngx_uint_t gu_tmp = 99;     // 99 is just a lable, doesn't make no sense.
-			if (ngx_ssl_create(plcf->upstream.ssl, plcf->ssl_protocols, &gu_tmp)
-			 != NGX_OK)
-			{
-				ngx_log_error(NGX_LOG_ERR, cf->log, 0,  "ggs_log:ngx proxy ngx_ssl_create fail");
-			 	return NGX_ERROR;
-			}
-		}
-		else{
-    	if (ngx_ssl_create(plcf->upstream.ssl, plcf->ssl_protocols, NULL)
-    	    != NGX_OK)
-    	{
-    	    return NGX_ERROR;
-    	}
+    
+    /* add by TASS gujq for use tass engine to do sm4 */                  
+    if(plcf->ssl_tass_sm4 == 1){                                          	
+        const char *engine_name_sm4 = "tasscard_sm4";                 
+        ENGINE *tasscardsm4_e = NULL;                                 
+                                                                      
+        if ((tasscardsm4_e = ENGINE_by_id(engine_name_sm4)) == NULL) {
+            ngx_log_error(NGX_LOG_EMERG, cf->log, 0,                  
+                      "ENGINE load id=[%s] failed", engine_name_sm4); 
+            return NGX_ERROR;                                    
+        }else{                                                        
+            ENGINE_init(tasscardsm4_e);                               
+            ENGINE_register_ciphers(tasscardsm4_e);                   
+            ENGINE_set_default_RAND(tasscardsm4_e);                   
+        }                                                             
+    }      
+
+    if(plcf->ssl_gm == 1){ // add by TASS gujq for http proxy gm client ssl init             
+    	ngx_uint_t gu_tmp = 99;     // 99 is just a lable, doesn't make no sense.              
+    	if (ngx_ssl_create(plcf->upstream.ssl, plcf->ssl_protocols, &gu_tmp)                   
+    	 != NGX_OK)                                                                            
+    	{                                                                                      
+    		ngx_log_error(NGX_LOG_ERR, cf->log, 0,  "ggs_log:ngx http proxy CNTLS ngx_ssl_create fail");  
+    	 	return NGX_ERROR;                                                                  
+    	}                                                                                      
+    }                                                                                        
+    else{                                                                                    
+        if (ngx_ssl_create(plcf->upstream.ssl, plcf->ssl_protocols, NULL)                    
+            != NGX_OK)                                                                       
+        {
+            return NGX_ERROR;
+        }
     }
 
     cln = ngx_pool_cleanup_add(cf->pool, 0);
@@ -4309,9 +4354,17 @@ ngx_http_proxy_set_ssl(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *plcf)
                           "for certificate \"%V\"", &plcf->ssl_certificate);
             return NGX_ERROR;
         }
+        if (plcf->ssl_enc_certificate.len) {
+            if (plcf->ssl_enc_certificate_key.len == 0) {
+                ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
+                              "no \"proxy_ssl_enc_certificate_key\" is defined "
+                              "for certificate \"%V\"", &plcf->ssl_enc_certificate);
+                return NGX_ERROR;
+            }
+        }
 
         if (ngx_ssl_certificate(cf, plcf->upstream.ssl, &plcf->ssl_certificate,
-                                &plcf->ssl_certificate_key, &plcf->certificates_enc, &plcf->certificate_enc_keys, plcf->ssl_passwords)
+                                &plcf->ssl_certificate_key, &plcf->ssl_enc_certificate, &plcf->ssl_enc_certificate_key, plcf->ssl_passwords)
             != NGX_OK)
         {
             return NGX_ERROR;

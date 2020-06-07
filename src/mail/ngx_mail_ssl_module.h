@@ -38,6 +38,9 @@ typedef struct {
 
     ngx_array_t     *certificates;
     ngx_array_t     *certificate_keys;
+    
+    ngx_str_t        certificates_enc;     //add by TASS gujq for GM
+    ngx_str_t        certificate_enc_keys; //add by TASS gujq for GM
 
     ngx_str_t        dhparam;
     ngx_str_t        ecdh_curve;

@@ -1,3 +1,4 @@
 
 Documentation is available at http://nginx.org
 
+./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --with-openssl=/root/tasscard_engine/tassl --prefix=/root/nginx --with-cc-opt=-DNGX_DEBUG

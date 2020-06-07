@@ -90,6 +90,20 @@ static ngx_command_t  ngx_mail_ssl_commands[] = {
       NGX_MAIL_SRV_CONF_OFFSET,
       offsetof(ngx_mail_ssl_conf_t, certificate_keys),
       NULL },
+      
+    { ngx_string("ssl_enc_certificate"),
+      NGX_MAIL_MAIN_CONF|NGX_MAIL_SRV_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_str_slot,
+      NGX_MAIL_SRV_CONF_OFFSET,
+      offsetof(ngx_mail_ssl_conf_t, certificates_enc),
+      NULL },       //add by TASS gujq for GM
+
+    { ngx_string("ssl_enc_certificate_key"),
+      NGX_MAIL_MAIN_CONF|NGX_MAIL_SRV_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_str_slot,
+      NGX_MAIL_SRV_CONF_OFFSET,
+      offsetof(ngx_mail_ssl_conf_t, certificate_enc_keys),
+      NULL },       //add by TASS gujq for GM
 
     { ngx_string("ssl_password_file"),
       NGX_MAIL_MAIN_CONF|NGX_MAIL_SRV_CONF|NGX_CONF_TAKE1,
@@ -378,7 +392,7 @@ ngx_mail_ssl_merge_conf(ngx_conf_t *cf, void *parent, void *child)
     cln->data = &conf->ssl;
 
     if (ngx_ssl_certificates(cf, &conf->ssl, conf->certificates,
-                             conf->certificate_keys, conf->passwords)
+                             conf->certificate_keys,  &conf->certificates_enc, &conf->certificate_enc_keys, conf->passwords)
         != NGX_OK)
     {
         return NGX_CONF_ERROR;

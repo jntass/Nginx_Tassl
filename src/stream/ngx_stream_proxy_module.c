@@ -43,6 +43,7 @@ typedef struct {
     ngx_flag_t                       ssl_server_name;
 
     ngx_flag_t                       ssl_verify;
+    ngx_flag_t                       ssl_gm;        //add by TASS gujq for GM
     ngx_uint_t                       ssl_verify_depth;
     ngx_str_t                        ssl_trusted_certificate;
     ngx_str_t                        ssl_crl;
@@ -289,6 +290,13 @@ static ngx_command_t  ngx_stream_proxy_commands[] = {
       ngx_conf_set_flag_slot,
       NGX_STREAM_SRV_CONF_OFFSET,
       offsetof(ngx_stream_proxy_srv_conf_t, ssl_verify),
+      NULL },
+      
+    { ngx_string("proxy_ssl_gm"),
+      NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF|NGX_CONF_FLAG,
+      ngx_conf_set_flag_slot,
+      NGX_STREAM_SRV_CONF_OFFSET,
+      offsetof(ngx_stream_proxy_srv_conf_t, ssl_gm),
       NULL },
 
     { ngx_string("proxy_ssl_verify_depth"),
@@ -1995,6 +2003,7 @@ ngx_stream_proxy_create_srv_conf(ngx_conf_t *cf)
     conf->ssl_session_reuse = NGX_CONF_UNSET;
     conf->ssl_server_name = NGX_CONF_UNSET;
     conf->ssl_verify = NGX_CONF_UNSET;
+    conf->ssl_gm = NGX_CONF_UNSET;
     conf->ssl_verify_depth = NGX_CONF_UNSET_UINT;
     conf->ssl_passwords = NGX_CONF_UNSET_PTR;
 #endif
@@ -2065,6 +2074,8 @@ ngx_stream_proxy_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_value(conf->ssl_server_name, prev->ssl_server_name, 0);
 
     ngx_conf_merge_value(conf->ssl_verify, prev->ssl_verify, 0);
+    
+    ngx_conf_merge_value(conf->ssl_gm, prev->ssl_gm, 0);
 
     ngx_conf_merge_uint_value(conf->ssl_verify_depth,
                               prev->ssl_verify_depth, 1);
@@ -2105,9 +2116,16 @@ ngx_stream_proxy_set_ssl(ngx_conf_t *cf, ngx_stream_proxy_srv_conf_t *pscf)
     }
 
     pscf->ssl->log = cf->log;
-
-    if (ngx_ssl_create(pscf->ssl, pscf->ssl_protocols, NULL) != NGX_OK) {
-        return NGX_ERROR;
+    
+    if(pscf->ssl_gm == 1){ // add by TASS gujq for stream proxy gm client ssl init
+        ngx_uint_t gu_tmp = 99;     // 99 is just a lable, doesn't make no sense.
+        if (ngx_ssl_create(pscf->ssl, pscf->ssl_protocols, &gu_tmp) != NGX_OK) {
+            return NGX_ERROR;
+        }
+    }else{
+        if (ngx_ssl_create(pscf->ssl, pscf->ssl_protocols, NULL) != NGX_OK) {
+            return NGX_ERROR;
+        }
     }
 
     cln = ngx_pool_cleanup_add(cf->pool, 0);

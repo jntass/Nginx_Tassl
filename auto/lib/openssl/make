@@ -56,6 +56,7 @@ $OPENSSL/.openssl/include/openssl/ssl.h:	$NGX_MAKEFILE
 	&& \$(MAKE) install_sw LIBDIR=lib
 	
 tass_setting:
+	mkdir -p $NGX_PREFIX/sbin/
 	@echo 'export LD_LIBRARY_PATH=$OPENSSL/lib:\$LD_LIBRARY_PATH' >$NGX_PREFIX/sbin/setting
 END
 

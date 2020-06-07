@@ -115,7 +115,14 @@ static ngx_command_t  ngx_http_ssl_commands[] = {
       NGX_HTTP_SRV_CONF_OFFSET,
       offsetof(ngx_http_ssl_srv_conf_t, certificate_enc_keys),
       NULL },
-     
+      
+    { ngx_string("ssl_tass_sm4"),             //add by TASS gujq for determine if use tass engine do sm4
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_FLAG,
+      ngx_conf_set_flag_slot,
+      NGX_HTTP_SRV_CONF_OFFSET,
+      offsetof(ngx_http_ssl_srv_conf_t, tass_sm4),
+      NULL },
+      
     { ngx_string("ssl_password_file"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
       ngx_http_ssl_password_file,
@@ -587,6 +594,7 @@ ngx_http_ssl_create_srv_conf(ngx_conf_t *cf)
     sscf->verify_depth = NGX_CONF_UNSET_UINT;
     sscf->certificates = NGX_CONF_UNSET_PTR;
     sscf->certificate_keys = NGX_CONF_UNSET_PTR;
+    sscf->tass_sm4 = NGX_CONF_UNSET;
     sscf->passwords = NGX_CONF_UNSET_PTR;
     sscf->builtin_session_cache = NGX_CONF_UNSET;
     sscf->session_timeout = NGX_CONF_UNSET;
@@ -711,7 +719,22 @@ ngx_http_ssl_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
             return NGX_CONF_ERROR;
         }
     }
+    
+    /* add by TASS gujq for use tass engine to do sm4 */
+    if(conf->tass_sm4 == 1){
+        const char *engine_name_sm4 = "tasscard_sm4";
+        ENGINE *tasscardsm4_e = NULL;
 
+        if ((tasscardsm4_e = ENGINE_by_id(engine_name_sm4)) == NULL) {
+            ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
+                      "ENGINE load id=[%s] failed", engine_name_sm4);
+            return NGX_CONF_ERROR;
+        }else{
+            ENGINE_init(tasscardsm4_e);
+            ENGINE_register_ciphers(tasscardsm4_e);
+            ENGINE_set_default_RAND(tasscardsm4_e);
+        }
+    }
     if (ngx_ssl_create(&conf->ssl, conf->protocols, conf) != NGX_OK) {
         return NGX_CONF_ERROR;
     }

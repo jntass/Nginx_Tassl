@@ -95,6 +95,8 @@ fi
 
 cat << END                                                    >> $NGX_MAKEFILE
 
+tass_setting:
+
 manpage:	$NGX_OBJS/nginx.8
 
 $NGX_OBJS/nginx.8:	$NGX_MAN $NGX_AUTO_CONFIG_H

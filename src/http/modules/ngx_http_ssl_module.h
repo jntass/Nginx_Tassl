@@ -38,6 +38,7 @@ typedef struct {
     
     ngx_str_t                       certificates_enc;     //add by TASS gujq for GM
     ngx_str_t                       certificate_enc_keys; //add by TASS gujq for GM
+    ngx_flag_t                      tass_sm4;             //add by TASS gujq for determine use tass engine do sm4 or not
 	
     ngx_array_t                    *certificate_values;
     ngx_array_t                    *certificate_key_values;
