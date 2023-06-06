@@ -1,13 +1,14 @@
 # Nginx_Tassl
  通过tassl支持国密协议的nginx
  
- 注：如使用TASSL-1.1.1k则可使用标准nginx，下载链接https://github.com/jntass/TASSL-1.1.1k
+ 注：TASSL最新版本https://github.com/jntass/TASSL-1.1.1(此版本可配合原生nginx搭建国密SSL web server和反向代理；如需实现国密SSL前向代理，请使用此仓库内经过定制的nginx)
  ## 如何使nginx调用tassl实现国密ssl协议？
 具体方法如下：
-1.	下载Tassl-1.1.1b_R_0.8.tgz版本进行编译，并安装到/root/lib_r/tassl中，如是其他目录需要在第二步的configure时，替换--with-openssl的目录。
+1.	下载https://github.com/jntass/TASSL-1.1.1，并安装。
 2.	下载江南天安修改的nginx-1.16.0_tassl.tgz支持国密的nginx进行编译。
 
-      ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --with-openssl=/root/lib_r/tassl --prefix=/root/nginx
+      ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --with-openssl=/usr/local/tassl --prefix=/usr/local/nginx
+      注：--with-openssl后跟TASSL安装路径
 
       make
 
@@ -17,13 +18,13 @@
 
      配置nginx.conf证书部分：
 
-     ssl_certificate      /root/lib_r/tassl/tassl_demo/cert/certs/SS.crt;    #/*签名证书*/
+     ssl_certificate      /usr/local/tassl/tassl_demo/cert/certs/SS.crt;    #/*签名证书*/
 
-     ssl_certificate_key  /root/lib_r/tassl/tassl_demo/cert/certs/SS.key;     #/*签名私钥*/
+     ssl_certificate_key  /usr/local/tassl/tassl_demo/cert/certs/SS.key;     #/*签名私钥*/
 
-     ssl_enc_certificate      /root/lib_r/tassl/tassl_demo/cert/certs/SE.crt;     #/*加密证书*/
+     ssl_enc_certificate      /usr/local/tassl/tassl_demo/cert/certs/SE.crt;     #/*加密证书*/
 
-     ssl_enc_certificate_key  /root/lib_r/tassl/tassl_demo/cert/certs/SE.key;     #/*加密私钥*/
+     ssl_enc_certificate_key  /usr/local/tassl/tassl_demo/cert/certs/SE.key;     #/*加密私钥*/
 
       注意：签名证书的证书用途需有数据签名功能，加密证书的证书用途需有数据加密功能。如果功能不正确，会导致握手失败。调用tassl_demo/cert/中的脚本生成的证书已经具备相应功能,可以用来测试。
 4.	下载密信浏览器或者360浏览器进行测试国密网站。
