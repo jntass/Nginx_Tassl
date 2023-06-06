@@ -1,10 +1,10 @@
 # Nginx_Tassl
  通过tassl支持国密协议的nginx
  
- 注：TASSL最新版本https://github.com/jntass/TASSL-1.1.1(此版本可配合原生nginx搭建国密SSL web server和反向代理；如需实现国密SSL前向代理，请使用此仓库内经过定制的nginx)
+ 注：TASSL最新版本https://github.com/jntass/TASSL-1.1.1 (此版本可配合原生nginx搭建国密SSL web server和反向代理；如需实现国密SSL前向代理，请使用此仓库内经过定制的nginx)
  ## 如何使nginx调用tassl实现国密ssl协议？
 具体方法如下：
-1.	下载https://github.com/jntass/TASSL-1.1.1，并安装。
+1.	下载https://github.com/jntass/TASSL-1.1.1 编译并安装。
 2.	下载江南天安修改的nginx-1.16.0_tassl.tgz支持国密的nginx进行编译。
 
       ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --with-openssl=/usr/local/tassl --prefix=/usr/local/nginx
