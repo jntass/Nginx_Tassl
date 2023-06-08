@@ -8,7 +8,7 @@
 2.	下载江南天安修改的nginx-1.16.0_tassl.tgz支持国密的nginx进行编译。
 
       ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --with-openssl=/usr/local/tassl --prefix=/usr/local/nginx
-      注：--with-openssl后跟TASSL安装路径
+      注：--with-openssl后跟TASSL源码路径
 
       make
 

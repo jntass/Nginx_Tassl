@@ -36,10 +36,10 @@ if [ $OPENSSL != NONE ]; then
             have=NGX_OPENSSL . auto/have
             have=NGX_SSL . auto/have
 
-            CORE_INCS="$CORE_INCS $OPENSSL/include"
-            CORE_DEPS="$CORE_DEPS $OPENSSL/include/openssl/ssl.h"
-            CORE_LIBS="$CORE_LIBS $OPENSSL/lib/libssl.a"
-            CORE_LIBS="$CORE_LIBS $OPENSSL/lib/libcrypto.a"
+            CORE_INCS="$CORE_INCS $OPENSSL/.openssl/include"
+            CORE_DEPS="$CORE_DEPS $OPENSSL/.openssl/include/openssl/ssl.h"
+            CORE_LIBS="$CORE_LIBS $OPENSSL/.openssl/lib/libssl.a"
+            CORE_LIBS="$CORE_LIBS $OPENSSL/.openssl/lib/libcrypto.a"
             CORE_LIBS="$CORE_LIBS $NGX_LIBDL"
             CORE_LIBS="$CORE_LIBS $NGX_LIBPTHREAD"
 
